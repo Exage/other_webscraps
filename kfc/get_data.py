@@ -2,76 +2,67 @@ import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
 
+from datetime import datetime
+
 urls = [
-    # { 
-    #     'url': 'https://www.kfc.by/page/faq',
-    #     'find': ['div.page-content']
-    # },
-    { 
-        'url': 'https://www.kfc.by/page/our-contacts',
-        'find': ['div.page-content']
-    },
     { 
         'url': 'https://www.kfc.by/about-us',
-        'find': ['span.flag', 'div.card-title', 'div.card-text']
+        'find': ['span.flag', 'div.card-title', 'div.card-text span']
     },
     { 
-        'url': 'https://www.kfc.by/stores',
-        'find': ['h5.card-title', 'p.address'],
-        'limit': 3
+        'url': 'https://www.kfc.by/eleven-ingredients',
+        'find': ['h5.card-title', 'div.card-text p']
     },
-    # { 
-    #     'url': 'https://www.kfc.by/news',
-    #     'find': ['h5.card-title', 'div.card-subtitle'],
-    #     'limit': 3
-    # },
+    {
+        'url': 'https://www.kfc.by/stores',
+        'find': ['h5.card-title', 'p.address', 'p.phone'],
+    }
 ]
 
-def write_data(items):
+all_text_data = f'Дата получения данных {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n'
+
+async def parse_page(url_item, soup, cards):
+    find_elems = url_item['find']
+
     page_content = ''
 
-    for item in items:
+    page_title = f'\n=== {soup.find('title').text.replace(' | KFC.BY', '')} ===\n\n\n'
 
-        text = str(item.text).strip()
+    page_content += page_title
 
-        page_content += text
+    for card in cards:
+        for elem in find_elems:
+            row_elem = card.select_one(elem)
+            
+            if row_elem:  
+                row = row_elem.text.replace('    ', '').replace('\n', '')
+                page_content += f'{row}\n'
+        
         page_content += '\n'
-    
+
+
     return page_content
 
-async def get_data(url):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url=url, ssl=False) as response:
-            soup = BeautifulSoup(await response.text(), 'html.parser')
-
-            page_title = soup.find('title').text.replace(' | KFC.BY', '')
-            section = soup.find('section', 'p-header')
-
-            cards = section.find_all('div', 'card')
-
-            return [page_title, cards]
-
 async def parse_pages():
-    
-    page_content = ''
+
+    global all_text_data
 
     for url_item in urls:
-        url, find = url_item.values()
+        url = url_item['url']
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=url, ssl=False) as response:
+                soup = BeautifulSoup(await response.text(), 'html.parser')
+                
+                section = soup.find('section', 'p-header')
+                cards = section.find_all('div', 'card')
 
-        title, cards = await get_data(url)
-        page_content += (f'{title}\n')
+                all_text_data += await parse_page(url_item, soup, cards)
 
-        for card in cards:
-            for i in find:
-                print(i)
+    # Запись всех данных в файл
+    # with open('index.txt', 'w', encoding='utf-8') as file:
+    #     file.write(all_text_data)
 
-        # print(url)
-        
-        
-        
-        
-    with open('index.html', 'w') as file:
-        file.write(page_content)
-
-
-asyncio.run(parse_pages())
+def get_data():
+    asyncio.run(parse_pages())
+    print(all_text_data)
+    return all_text_data
