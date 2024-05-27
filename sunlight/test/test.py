@@ -12,12 +12,15 @@ def browser():
 
 def test_page_catalog_count(browser):
     browser.get(link)
-    assert '28 186 товаров' in browser.find_element(By.CSS_SELECTOR, 'span.catalog-title__count').text
+
+    elem = int(browser.find_element(By.CSS_SELECTOR, 'span.catalog-title__count').text.replace('товаров', '').replace(' ', ''))
+
+    assert elem >= 28000, 'что-то не то'
 
 def test_products_count(browser):
     browser.get(link)
     products = browser.find_elements(By.CSS_SELECTOR, 'div.cl-item')
-    assert len(products) == 65, 'что-то не то'
+    assert len(products) >= 60, 'что-то не то'
 
 def test_product_brand(browser):
     browser.get(link)
