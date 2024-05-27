@@ -3,7 +3,7 @@ import sqlite3
 database_name = 'database.db'
 
 # Добавить данные в БД
-def insert_selection(date, items_num):
+def insert_parsing(date, items_num):
     conn = sqlite3.connect(database_name)
     cursor = conn.cursor()
     
@@ -14,22 +14,27 @@ def insert_selection(date, items_num):
     
     conn.commit()
     conn.close()
+
     return cursor.lastrowid
 
-def insert_product(parsing_id, name, article, brand, price, url):
+def insert_results(parsing_id, results):
     conn = sqlite3.connect(database_name)
     cursor = conn.cursor()
 
-    cursor.execute('''
-    INSERT INTO Results (Parsing_id, Name, Article, Brand, Price, Url)
-    VALUES (?, ?, ?)
-    ''', (parsing_id, name, article, brand, price, url))
+    for result in results:
+
+        name, article, brand, price, url = result
+
+        cursor.execute('''
+        INSERT INTO Results (Parsing_id, Name, Article, Brand, Price, Url)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ''', (parsing_id, name, article, brand, price, url))
     
     conn.commit()
     conn.close()
 
 # Получить все даты и продукты
-def fetch_all_selections():
+def fetch_all_parsings():
     conn = sqlite3.connect(database_name)
     cursor = conn.cursor()
     
@@ -40,28 +45,28 @@ def fetch_all_selections():
 
     return selections
 
-def fetch_all_products():
+def fetch_all_results():
     conn = sqlite3.connect(database_name)
     cursor = conn.cursor()
     
     cursor.execute('SELECT * FROM Results')
     
-    products = cursor.fetchall()
+    results = cursor.fetchall()
     conn.close()
 
-    return products
+    return results
 
 # Получить данные по номеру отбора
-def fetch_products_by_selection(parsing_id):
+def fetch_results_by_selection(parsing_id):
     conn = sqlite3.connect(database_name)
     cursor = conn.cursor()
     
     cursor.execute('SELECT * FROM Results WHERE Parsing_id = ?', (parsing_id,))
     
-    products = cursor.fetchall()
+    result = cursor.fetchall()
     conn.close()
 
-    return products
+    return result
 
 
 conn = sqlite3.connect(database_name)

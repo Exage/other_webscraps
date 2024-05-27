@@ -4,8 +4,6 @@ from selenium.webdriver.common.by import By
 
 link = "https://ziko.by/catalog/naruchnye-chasy"
 
-import time
-
 @pytest.fixture(scope="function")
 def browser():
     browser = webdriver.Chrome()
