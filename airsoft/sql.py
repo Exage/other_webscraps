@@ -1,5 +1,4 @@
 import sqlite3
-import datetime
 
 def get_data_tables():
     conn = sqlite3.connect('test.db')

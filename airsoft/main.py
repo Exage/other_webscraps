@@ -41,26 +41,26 @@ root.geometry("1200x600")
 root.minsize(700,400)
 
 root.columnconfigure(2, weight=1)
-root.rowconfigure(2, weight=1)
+root.rowconfigure(0, weight=1)
 
 # Buttons
 
-btn_sync_label = ttk.Label(text='Синхронно: ', anchor='w')
-btn_sync_label.grid(row=0, column=0, sticky='nsew')
+# btn_sync_label = ttk.Label(text='Синхронно: ', anchor='w')
+# btn_sync_label.grid(row=0, column=0, sticky='nsew')
 
-btn_async_label = ttk.Label(text='Асинхронно: ', anchor='w')
-btn_async_label.grid(row=1, column=0, sticky='nsew')
+# btn_async_label = ttk.Label(text='Асинхронно: ', anchor='w')
+# btn_async_label.grid(row=1, column=0, sticky='nsew')
 
-btn_sync = Button(root, command=sync_comand, text='запуск')
-btn_sync.grid(row=0, column=1, sticky='nsew')
+btn_sync = Button(root, command=sync_comand, text='Синхронно')
+btn_sync.grid(row=1, column=0, sticky='nsew')
 
-btn_async = Button(root, command=async_comand, text='запуск')
-btn_async.grid(row=1, column=1, sticky='nsew')
+btn_async = Button(root, command=async_comand, text='Асинхронно')
+btn_async.grid(row=2, column=0, sticky='nsew')
 
 # Dates
 
 listbox = Listbox(root)
-listbox.grid(column=0, row=2, sticky="nsew", columnspan=2)
+listbox.grid(column=0, row=0, sticky="nsew")
 
 show_dates()
 
