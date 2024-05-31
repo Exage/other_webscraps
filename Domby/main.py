@@ -1,4 +1,4 @@
-import tkinter as tk
+from tkinter import *
 from tkinter import ttk
 
 import asyncio
@@ -6,7 +6,7 @@ import aiohttp
 import requests
 from bs4 import BeautifulSoup
 
-from database import setup_database, add_catalog_with_products, fetch_all_catalogs, fetch_all_products, fetch_products_by_catalog
+from database import setup_database, add_catalog_with_products, fetch_all_catalogs, fetch_products_by_catalog
 
 links = [ f'https://www.dom.by/gds/divany/brest/?page={i}' for i in range(1, 6) ]
 
@@ -56,12 +56,14 @@ async def parse_page_async():
     add_catalog_with_products(total_products, product_list)
 
 def button1_action():
-    # Placeholder for button 1 action
-    pass
+    parse_page_sync()
+    
+    update_catalogs_table()
 
 def button2_action():
-    # Placeholder for button 2 action
-    pass
+    asyncio.run(parse_page_async())
+    
+    update_catalogs_table()
 
 def update_catalogs_table():
     for i in catalogs_table.get_children():
@@ -76,42 +78,52 @@ def update_products_table(catalog_id):
         products_table.insert('', 'end', values=product)
 
 def on_catalog_select(event):
-    selected_item = catalogs_table.selection()[0]
-    catalog_id = catalogs_table.item(selected_item, 'values')[0]
-    result_label.config(text=f'Результат отбора [{catalog_id}]')
-    update_products_table(catalog_id)
+    selected_item = catalogs_table.selection()
+    if selected_item:
+        catalog_id = catalogs_table.item(selected_item[0], 'values')[0]
+        result_label.config(text=f'Результат отбора №{catalog_id}')
+        update_products_table(catalog_id)
 
 setup_database()
 
 # Tkinter GUI
-root = tk.Tk()
-root.title('Catalog Manager')
+root = Tk()
+root.geometry('1200x650')
+root.title('Диваны Бреста')
 
 root.rowconfigure(2, weight=1)
+root.columnconfigure(0, weight=1)
+root.columnconfigure(1, weight=1)
 
 # Buttons
-button1 = tk.Button(root, text='Button 1', command=button1_action)
+button1 = Button(root, text='Синхронно', command=button1_action)
 button1.grid(row=0, column=0, padx=5, pady=5)
 
-button2 = tk.Button(root, text='Button 2', command=button2_action)
+button2 = Button(root, text='Асинхронно', command=button2_action)
 button2.grid(row=0, column=1, padx=5, pady=5)
 
 # Label
-result_label = tk.Label(root, text='Выберите дату отбора')
+result_label = Label(root, text='Выберите дату отбора')
 result_label.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
 
 # Catalogs Table
 catalogs_table = ttk.Treeview(root, columns=('CatalogID', 'DateCreated', 'TotalProducts'), show='headings')
-catalogs_table.heading('CatalogID', text='CatalogID')
-catalogs_table.heading('DateCreated', text='DateCreated')
-catalogs_table.heading('TotalProducts', text='TotalProducts')
+catalogs_table.heading('CatalogID', text='ID Каталога')
+catalogs_table.heading('DateCreated', text='Дата')
+catalogs_table.heading('TotalProducts', text='Продукты')
+catalogs_table.column("#1", stretch=NO, width=75)
+catalogs_table.column("#2", stretch=YES, width=100)
+catalogs_table.column("#3", stretch=NO, width=100)
 catalogs_table.grid(row=2, column=0, padx=5, pady=5, sticky='NSEW')
 
 # Products Table
 products_table = ttk.Treeview(root, columns=('CatalogID', 'Name', 'Price'), show='headings')
-products_table.heading('CatalogID', text='CatalogID')
-products_table.heading('Name', text='Name')
-products_table.heading('Price', text='Price')
+products_table.heading('CatalogID', text='ID Каталога')
+products_table.heading('Name', text='Название')
+products_table.heading('Price', text='Цена')
+products_table.column("#1", stretch=NO, width=75)
+products_table.column("#2", stretch=YES, width=100)
+products_table.column("#3", stretch=NO, width=100)
 products_table.grid(row=2, column=1, padx=5, pady=5, sticky='NSEW')
 
 # Bind selection event
